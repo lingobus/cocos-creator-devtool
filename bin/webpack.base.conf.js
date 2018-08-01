@@ -12,11 +12,8 @@ const configs = []
 const imageLoader = utils.getImageLoader(env)
 const fontLoader = utils.getFontsLoader(env)
 const lessLoader = utils.getLessLoader(env)
-const vueLoader = utils.getVueLoader(env, {
-  loaders: {
-    i18n: '@kazupon/vue-i18n-loader'
-  }
-})
+const vueLoader = utils.getVueLoader(env)
+
 const jsLoader = utils.getJsLoader(/\.jsx?$/, {
   exclude: /node_modules/,
   include: config.paths.src,
@@ -80,6 +77,7 @@ configs.push({
 
 // jade
 const jadeLoaderAndPlugins = utils.getJadeLoaderPluginMaybeWithPlugin(true, env)
+console.log(config.paths)
 configs.push({
   name: ' Jade '.magenta.bold.inverse,
   target: 'node',
@@ -90,8 +88,8 @@ configs.push({
     baseDir: path.join(config.paths.src, 'html')
   }),
   output: {
-    path: path.resolve(config.paths.root, 'views'),
-    filename: '[name].jade',
+    path: path.resolve(config[env].assetsRoot, 'html'),
+    filename: '[name].delete',
     publicPath: config[env].assetsPublicPath
   },
   module: {
