@@ -1,0 +1,3 @@
+/*not entry*/
+export default {
+}
