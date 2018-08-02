@@ -1,21 +1,27 @@
 <template lang="pug">
-.main
-  .root-container.clear-fix
-    p
-      center
-        h1 A MPA Vue.js Project
+.cc-devtool-popup
+  p(v-if="isCocosGame") Cocos Creator game is detected on this page. Open DevTools and look for the 'Cocos Creator Devtool'.
+  p(v-else) Cocos Creator game not detected!
 </template>
+
 <style lang="styl">
-div h1
-  color: gray
-  margin: 5em auto
+p
+  margin: 1em
+  min-width: 20em
+  text-align: center
 </style>
+
 <script>
   export default {
-    name: 'app',
-    mixins: [],
+    name: 'CocosCreatorDevtollPopup',
     components: {},
+    data () {
+      return {
+        isCocosGame: false
+      }
+    },
     mounted () {
+
     },
     methods: {
     }

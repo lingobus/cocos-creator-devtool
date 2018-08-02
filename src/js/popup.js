@@ -2,7 +2,6 @@
 import Vue from 'vue'
 // import Vuex from 'vuex'
 import App from './Popup.vue'
-import modules from './store'
 
 // vuex
 // const store = new Vuex.Store({

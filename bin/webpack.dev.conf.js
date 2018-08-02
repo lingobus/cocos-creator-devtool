@@ -5,7 +5,7 @@ var config = require('./config.js')
 var baseWebpackConfigs = require('./webpack.base.conf')
 
 var wpconfig = {
-  devtool: '#eval-source-map',
+  devtool: '#inline-source-map',
   externals: config.externals,
   watch: true,
   watchOptions: {

@@ -271,7 +271,7 @@ exports.getCopyPlugins = function (env, assetsPublicPath) {
       return content
     }
   }, {
-    from: path.join(config.paths.src, 'html/manifest.json'),
+    from: path.join(config.paths.src, 'manifest.json'),
     to: path.join(config[env].assetsRoot, 'manifest.json'),
     toType: 'file'
   }])
