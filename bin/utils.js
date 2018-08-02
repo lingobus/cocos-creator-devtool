@@ -270,6 +270,10 @@ exports.getCopyPlugins = function (env, assetsPublicPath) {
       fs.writeFileSync(path.join(config[env].assetsRoot, 'manifest-img.json'), JSON.stringify(manifsetImg, null, 2))
       return content
     }
+  }, {
+    from: path.join(config.paths.src, 'html/manifest.json'),
+    to: path.join(config[env].assetsRoot, 'manifest.json'),
+    toType: 'file'
   }])
 }
 

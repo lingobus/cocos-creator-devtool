@@ -12,12 +12,6 @@ const envconfigs = {
     views: path.resolve(__dirname, '../views')
   },
   externals: {
-    'axios': 'axios',
-    'moment': 'moment',
-    'vue': 'Vue',
-    'vue-router': 'VueRouter',
-    'vue-i18n': 'VueI18n',
-    'vuex': 'Vuex'
   },
   alias: {
     '@': path.resolve(__dirname, '../src'),
