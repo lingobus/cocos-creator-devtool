@@ -11,7 +11,7 @@
   "icons": {
     "48": "img/icon-default.png"
   },
-  "devtools_page": "html/devtool.html",
+  "devtools_page": "html/cc-devtool.html",
   "content_scripts": [
     {
       "matches": [
