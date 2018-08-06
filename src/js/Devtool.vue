@@ -100,8 +100,13 @@ export default {
     },
     loadTreeNodes () {
       return this.ccdevtool.getTreeNodes().then(treeNode => {
-        this.treeNode = [treeNode];
-        this.nodeProps = treeNode.props;
+        this.ccdevtool.createDebugLayer();
+        if (!treeNode) {
+          throw new Error('Get Tree Nodes information failed!');
+        } else {
+          this.treeNode = [treeNode];
+          this.nodeProps = treeNode.props;
+        }
       });
     },
     filterNode (value, data) {
@@ -110,6 +115,7 @@ export default {
     },
     onClickTreeNode (node) {
       this.nodeProps = node.props;
+      this.ccdevtool.selectNode(node.uuid);
     },
     RefreshTree () {
 
