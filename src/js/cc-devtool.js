@@ -13,6 +13,9 @@ function createCocosCreatorDevtoolPanel () {
     'Shown,Hidden,Search'.split(',').forEach(event => {
       panel['on' + event].addListener(function (arg1, arg2) {
         log(event, arg1, arg2);
+        if (event === 'Hidden') {
+          window.app.onHidden();
+        }
         chrome.runtime.sendMessage({type:':cc-devtool-' + event.toLowerCase()})
       })
     })
@@ -22,7 +25,7 @@ function createCocosCreatorDevtoolPanel () {
 /* eslint-disable */
 import Vue from 'vue'
 // import Vuex from 'vuex'
-import App from './Devtool.vue'
+import App from './components/Devtool.vue'
 
 // vuex
 // const store = new Vuex.Store({

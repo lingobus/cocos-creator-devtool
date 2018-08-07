@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Vue from 'vue'
 // import Vuex from 'vuex'
-import App from './components/Popup.vue'
+import App from './components/Options.vue'
 
 // vuex
 // const store = new Vuex.Store({
