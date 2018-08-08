@@ -1,7 +1,9 @@
 <template lang="pug">
-.main
+.main(@mouseup.capture="onMouseUp", @mousedown.capture="onMouseDown")
   .root-container.clear-fix
     el-header
+      img.logo(:src="LogImg")
+      h1 Cocos Creator Devtool
       //- el-checkbox(v-model="isShowDebugLayer") Debug Layer
       | &nbsp;
       el-checkbox(v-model="isShowFps") FPS Panel
@@ -9,7 +11,7 @@
       el-checkbox(v-model="isShowErudaBtn") Eruda Button
       | &nbsp;
       | &nbsp;
-      el-button(type="primary", size="mini", @click="refreshTree") Refresh
+      el-button#refresh-btn(type="primary", size="mini", @click="refreshTree", icon="el-icon-refresh") Refresh
     el-container
       el-aside
         el-input(
@@ -20,18 +22,20 @@
         el-tree(
           ref="tree",
           :data="treeNode",
-          node-key="$index",
-          :default-expanded-keys="[0]",
+          node-key="uuid",
+          :default-expanded-keys="[1]",
           :expand-on-click-node="false",
           :filter-node-method="filterNode",
           @node-click="onClickTreeNode")
       el-main
-        el-button(type="primary", @click="inspectNode()") Inspect
+        span
+          i.el-icon-setting(style="font-size:24px;margin-right: 1em;vertical-align:middle;color:gray;")
+          el-button(type="primary", @click="inspectNode()", icon="el-icon-view") Inspect
         el-table(:data="nodeComps", stripe)
           el-table-column(prop="key", label="Component", :width="200")
           el-table-column(prop="value", label="Value", :width="300")
             template(slot-scope="scope")
-              el-button(size="mini", type="normal", @click="inspectComponent(scope.row)") Inspect
+              el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
         el-table(:data="nodeProps", stripe)
           el-table-column(prop="key", label="Property", :width="200")
           el-table-column(prop="value", label="Value", :width="300")
@@ -39,7 +43,7 @@
               span(v-if="shouldDisplayText(scope.row)") {{scope.row.value}}
               el-checkbox(v-else-if="shouldDisplayCheckbox(scope.row)", size="mini",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
-              el-input-number(v-else-if="shouldDispalyInputNumber(scope.row)", size="mini",
+              el-input-number(v-else-if="shouldDispalyInputNumber(scope.row)", size="mini", :step="inputNumberStep",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
               el-color-picker(v-else-if="shouldDisplayColorPicker(scope.row)", size="mini",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
@@ -48,8 +52,21 @@
 </template>
 
 <style lang="styl">
+.logo
+  width: 24px
+  height: 24px
+  vertical-align: top
+  margin-right: 1em
+h1
+  font-size: 14px
+  display: inline
+  margin: 0 1em 0 0
 .el-table td
   padding: 2px
+
+.main
+  input, button
+    border-radius: 2px
 
 .el-input--mini .el-input__inner
   height: 24px
@@ -62,9 +79,11 @@
 <script>
 import log from '../utils/logger.js'
 import injectedScript from '../injectedScript.js'
-
+import LogImg from '../../img/icon-default.png'
 // element-ui
 import 'element-ui/lib/theme-chalk/index.css'
+import { Message } from 'element-ui'
+import { Notification } from 'element-ui'
 import ElButton from 'element-ui/lib/button'
 import ElCheckbox from 'element-ui/lib/checkbox'
 import ElInput from 'element-ui/lib/input'
@@ -79,7 +98,7 @@ import ElFooter from 'element-ui/lib/footer'
 import ElTable from 'element-ui/lib/table'
 import ElTableColumn from 'element-ui/lib/table-column'
 
-export default {
+const app = {
   name: 'app',
   mixins: [],
   components: {
@@ -105,10 +124,21 @@ export default {
       treeNode: [],
       nodeProps: [],
       nodeComps: [],
-      filterText: ''
+      filterText: '',
+      LogImg,
+      inputNumberStep: 1
     }
   },
   mounted () {
+    if (localStorage.getItem('showTip') !== 'true') {
+      Notification.info({
+        duration: 0,
+        message: 'Tip: You can use Cmd/Ctrl/Shift to alter step when click +/- buttons',
+        onClose () {
+          localStorage.setItem('showTip', true)
+        }
+      })
+    }
     window.app = this;
     this.inspectedWindow = chrome.devtools.inspectedWindow;
     const tabId = chrome.devtools.inspectedWindow.tabId
@@ -116,14 +146,22 @@ export default {
       name: '' + tabId
     });
 
+    conn.postMessage({
+      name: 'panelPageCreated',
+      tabId
+    });
+
     log(`Connecting to window #${tabId}`);
 
     conn.onMessage.addListener(message => {
       if (!message) return;
       log(message);
+      if (message.type === 'inspectedWinReloaded') {
+        this.init();
+      }
     });
 
-    this.injectScript().then(_ => this.loadTreeNodes());
+    this.init();
   },
   watch: {
     filterText (val) {
@@ -141,10 +179,16 @@ export default {
     }
   },
   methods: {
+    init () {
+      this.injectScript().then(_ => this.loadTreeNodes());
+    },
     eval(code) {
       return new Promise((resolve, reject) => {
         try {
-          this.inspectedWindow.eval(code, resolve);
+          this.inspectedWindow.eval(code, res => {
+            if (res) log(res);
+            resolve(res);
+          });
         } catch (e) {
           log(e);
           reject(e);
@@ -172,14 +216,17 @@ export default {
     loadTreeNodes () {
       return this.ccdevtool.getTreeNodes().then(treeNode => {
         this.ccdevtool.createDebugLayer();
-        if (!this.isShowDebugLayer) this.ccdevtool.hideDebugLayer();
         if (!treeNode) {
-          throw new Error('Get Tree Nodes information failed!');
+          console.error('Get Tree Nodes information failed!');
+          Message.warning({
+            message: 'You may need to click the refresh button to reload the node tree!'
+          });
         } else {
           this.treeNode = [treeNode];
           this.nodeProps = treeNode.props;
           this.nodeComps = treeNode.comps;
         }
+        if (!this.isShowDebugLayer) this.ccdevtool.hideDebugLayer();
       });
     },
     filterNode (value, data) {
@@ -198,6 +245,22 @@ export default {
     },
     onHidden () {
       this.ccdevtool.hideDebugLayer();
+    },
+    onMouseDown (e) {
+      var step = 1;
+      if (e.metaKey || e.ctrlKey) {
+        step = 10;
+      }
+      if (e.altKey) {
+        step = 100;
+      }
+      if (e.shiftKey) {
+        step = 0.1;
+      }
+      this.inputNumberStep = step
+    },
+    onMouseUp (e) {
+      this.inputNumberStep = 1;
     },
     refreshTree () {
       this.loadTreeNodes();
@@ -227,4 +290,7 @@ export default {
     }
   }
 }
+
+
+export default app;
 </script>

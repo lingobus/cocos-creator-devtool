@@ -28,6 +28,9 @@ var manifest = new ManifestPlugin({
     return manifest;
   }
 })
+baseWebpackConfigs[0].optimization = {
+  minimize: true
+}
 baseWebpackConfigs[0].plugins = plugins.concat(utils.getWebpackProdHelpPlugins().concat(manifest))
 
 if (process.env.HOSTALIAS) {

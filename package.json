@@ -4,7 +4,6 @@
   "description": "Chrome and DevTools extension for debugging Cocos Creator games",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development WEBPACK=css,html node ./bin/build.js",
     "release": "cross-env NODE_ENV=production node ./bin/build.js",
     "start": "cross-env NODE_ENV=development webpack --watch --config ./bin/webpack.dev.conf.js"
   },

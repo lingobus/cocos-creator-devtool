@@ -32,7 +32,7 @@ configs.push({
   context: config.paths.root,
   output: {
     path: config[env].assetsRoot,
-    filename: env == 'dev' ? '[name].js' : '[name]-[chunkhash].js',
+    filename: env == 'dev' ? '[name].js' : '[name].js',
     publicPath: config[env].assetsPublicPath
   },
   entry: utils.getEntries(['.js'], {
@@ -71,7 +71,7 @@ configs.push({
   entry: utils.getEntries(['.styl']),
   output: {
     path: config[env].assetsRoot,
-    filename: env == 'dev' ? '[name].css' : '[name]-[chunkhash].css',
+    filename: env == 'dev' ? '[name].css' : '[name].css',
     publicPath: config.dev.assetsPublicPath
   },
   resolve: {

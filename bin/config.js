@@ -27,7 +27,7 @@ const envconfigs = {
     },
     port: 8080,
     assetsRoot: path.resolve(__dirname, buildPath, 'prod'),
-    assetsPublicPath: '/static/'
+    assetsPublicPath: '../'
   },
   dev: {
     env: {
@@ -35,7 +35,7 @@ const envconfigs = {
     },
     port: 8080,
     assetsRoot: path.resolve(__dirname, buildPath, 'dev'),
-    assetsPublicPath: '/static/',
+    assetsPublicPath: '../',
   }
 }
 const env = process.env.NODE_ENV === 'development' ? 'dev' : 'prod'

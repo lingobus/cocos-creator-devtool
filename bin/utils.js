@@ -70,7 +70,7 @@ exports.getEntries = function(extensions, options) {
 
 const ImageNames = {
   dev: 'img/[name].[ext]',
-  prod: 'img/[name]-[hash:7].[ext]'
+  prod: 'img/[name].[ext]'
 }
 exports.getImageLoader = function(env, limit) {
   return {
@@ -86,7 +86,7 @@ exports.getImageLoader = function(env, limit) {
 
 const FontNames = {
   dev: 'fonts/[name].[ext]',
-  prod: 'fonts/[name]-[chunkhash].[ext]'
+  prod: 'fonts/[name].[ext]'
 }
 
 exports.getFontsLoader = function(env, limit) {
@@ -121,7 +121,7 @@ exports.getVueLoader = function (env, options) {
 
 const CssNames = {
     dev: '[name].css',
-    prod: '[name]-[chunkhash].css'
+    prod: '[name].css'
   }
   /**
    * this loader compile stylus files into css files
@@ -237,13 +237,13 @@ exports.getWebpackDevHelperPlugins = function(title, opts) {
 var WebpackMd5Hash = require('webpack-md5-hash');
 exports.getWebpackProdHelpPlugins = function() {
   const plugins = [
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
-    }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new WebpackMd5Hash()
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress: {
+    //     warnings: false
+    //   }
+    // }),
+    // new webpack.optimize.OccurrenceOrderPlugin(),
+    // new WebpackMd5Hash()
   ]
   return plugins
 }
@@ -252,7 +252,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin')
 var crypto = require('crypto')
 var manifsetImg = {}
 exports.getCopyPlugins = function (env, assetsPublicPath) {
-  var tpl = env === 'dev' ? '[path][name].[ext]' : '[path][name]-[hash:7].[ext]'
+  var tpl = env === 'dev' ? '[path][name].[ext]' : '[path][name].[ext]'
   return new CopyWebpackPlugin([{
     context: path.join(config.paths.src, 'img'),
     from: '**/*',

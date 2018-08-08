@@ -35,12 +35,13 @@
   ],
   "permissions": [
     "tabs",
+    "storage",
+    "nativeMessaging",
+    "webNavigation",
+
     "http://*/*",
     "https://*/*",
-    "*://*/*",
-    "tabs",
-    "storage",
-    "nativeMessaging"
+    "*://*/*"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval';  object-src 'self'"
 }
