@@ -1,30 +1,6 @@
 import log from 'utils/logger.js'
 
-log('cc-devtool-backgroundScript.js');
-// chrome.extension.onConnect.addListener(function (port) {
-//   function extensionListener (message, sender, sendResponse) {
-//     if (message.tabId && message.content) {
-//       const act = message.action;
-//       if (act === 'code') {
-//         chrome.tabs.executeScript(message.tabId, {code: message.content});
-//       } else if (act === 'script') {
-//         chrome.tabs.executeScript(message.tabId, {file: message.content});
-//       } else {
-//         chrome.tabs.sendMessage(message.tabId, message, sendResponse);
-//       }
-
-//     } else {
-//       port.postMessage(message);
-//     }
-//     sendResponse(message);
-//   }
-
-//   chrome.extension.onMessage.addListener(extensionListener);
-
-//   port.onDisconnect.addListener(port => chrome.extension.onMessage.removeListener(extensionListener));
-// });
-
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => true);
+log('cc-devtool-backgroundScript.js loaded!');
 
 var panelConnections = {};
 
@@ -59,13 +35,19 @@ chrome.runtime.onConnect.addListener(function(panelConnection) {
 });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  // Messages from content scripts should have sender.tab set
   if (sender.tab) {
-    var tabId = sender.tab.id;
+    var tabId = sender.tab.id, not = '';
     if (tabId in panelConnections) {
       panelConnections[tabId].postMessage(request);
     } else {
+      not = '-not'
       log("Tab not found in connection list.");
+    }
+    if (request.type === ':cc-found') {
+      chrome.browserAction.setPopup({
+        tabId: sender.tab.id,
+        popup: `html/popup${not}-found.html`
+      })
     }
   }
   return true;
@@ -77,7 +59,7 @@ chrome.webNavigation.onCompleted.addListener(function(data) {
     if (data.frameId === 0) {
       log('FrameId', data.frameId)
       panelConnections[data.tabId].postMessage({
-        type: 'inspectedWinReloaded'
+        type: ':inspectedWinReloaded'
       });
     }
   }

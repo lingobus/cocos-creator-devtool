@@ -23,17 +23,18 @@
           ref="tree",
           :data="treeNode",
           node-key="uuid",
+          :highlight-current="true",
           :default-expanded-keys="[1]",
           :expand-on-click-node="false",
           :filter-node-method="filterNode",
           @node-click="onClickTreeNode")
       el-main
-        span
+        div(style="margin-bottom:1em;")
           i.el-icon-setting(style="font-size:24px;margin-right: 1em;vertical-align:middle;color:gray;")
           el-button(type="primary", @click="inspectNode()", icon="el-icon-view") Inspect
-        el-table(:data="nodeComps", stripe)
+        el-table(:data="nodeComps", stripe, empty-text="No Data")
           el-table-column(prop="key", label="Component", :width="200")
-          el-table-column(prop="value", label="Value", :width="300")
+          el-table-column(prop="value", label="", :width="300")
             template(slot-scope="scope")
               el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
         el-table(:data="nodeProps", stripe)
@@ -41,7 +42,7 @@
           el-table-column(prop="value", label="Value", :width="300")
             template(slot-scope="scope")
               span(v-if="shouldDisplayText(scope.row)") {{scope.row.value}}
-              el-checkbox(v-else-if="shouldDisplayCheckbox(scope.row)", size="mini",
+              el-switch(v-else-if="shouldDisplayCheckbox(scope.row)", size="mini",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
               el-input-number(v-else-if="shouldDispalyInputNumber(scope.row)", size="mini", :step="inputNumberStep",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
@@ -61,12 +62,24 @@ h1
   font-size: 14px
   display: inline
   margin: 0 1em 0 0
-.el-table td
-  padding: 2px
+
+.el-table
+  margin-bottom: 1em
+  &:before
+    display: none
+  td
+    padding: 2px
+  th
+    background-color: #efefef
 
 .main
   input, button
     border-radius: 2px
+
+.el-button--primary, .el-checkbox__inner
+  background-color: #4285F4
+  border-color: #4285F4
+
 
 .el-input--mini .el-input__inner
   height: 24px
@@ -74,18 +87,28 @@ h1
 
 .el-input-number--mini
   line-height: 22px
+
+.el-tree-node.is-current
+  position: relative
+  &:before
+    content: '$n0'
+    position: absolute
+    top: 0.5em
+    right: 4px
+    color: #b7b7b7
 </style>
 
 <script>
 import log from '../utils/logger.js'
 import injectedScript from '../injectedScript.js'
-import LogImg from '../../img/icon-default.png'
+import LogImg from '../../img/48.png'
 // element-ui
 import 'element-ui/lib/theme-chalk/index.css'
 import { Message } from 'element-ui'
 import { Notification } from 'element-ui'
 import ElButton from 'element-ui/lib/button'
 import ElCheckbox from 'element-ui/lib/checkbox'
+import ElSwitch from 'element-ui/lib/switch'
 import ElInput from 'element-ui/lib/input'
 import ElInputNumber from 'element-ui/lib/input-number'
 import ElColorPicker from 'element-ui/lib/color-picker'
@@ -107,6 +130,7 @@ const app = {
     ElColorPicker,
     ElButton,
     ElCheckbox,
+    ElSwitch,
     ElTree,
     ElContainer,
     ElHeader,
@@ -156,8 +180,11 @@ const app = {
     conn.onMessage.addListener(message => {
       if (!message) return;
       log(message);
-      if (message.type === 'inspectedWinReloaded') {
+      switch (message.type) {
+        case ':inspectedWinReloaded':
+        case ':loadScene':
         this.init();
+          break;
       }
     });
 
@@ -185,6 +212,7 @@ const app = {
     eval(code) {
       return new Promise((resolve, reject) => {
         try {
+          log(code);
           this.inspectedWindow.eval(code, res => {
             if (res) log(res);
             resolve(res);

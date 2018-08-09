@@ -15,8 +15,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-proxy-table.dev.js
 
 #project
-/views
 .vscode

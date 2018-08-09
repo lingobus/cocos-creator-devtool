@@ -5,7 +5,7 @@ chrome.devtools.inspectedWindow.eval('!!window.cc && !!window.cc.game', hasCC =>
 });
 
 const tabTitle = "Cocos Creator Devtool"
-const icon = "img/icon-default.png"
+const icon = "img/48.png"
 const html = "html/devtool.html"
 
 function createCocosCreatorDevtoolPanel () {

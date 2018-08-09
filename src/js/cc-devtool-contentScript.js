@@ -1,9 +1,9 @@
-// this script runs in the context of page being inspected
-(function () {
-  const isCocosGame = _ => !!document.querySelector('#GameCanvas') && typeof window.cc !== 'undefined';
-  window.addEventListener('message', e => {
-    if (e.source === window && isCocosGame()) {
-      chrome.extension.sendMessage(e.data);
-    }
-  });
-})();
+window.addEventListener('message', e => {
+  /**
+   * Can not access window.cc from content script
+   * if #GameCanvas exists, we assume that Cocos runtime is avaiable
+   */
+  if (e.source === window && !!document.querySelector('#GameCanvas')) {
+    chrome.runtime.sendMessage(e.data);
+  }
+});
