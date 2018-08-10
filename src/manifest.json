@@ -30,7 +30,6 @@
       "js/cc-devtool-backgroundScript.js"
     ]
   },
-  "options_page": "html/options.html",
   "web_accessible_resources": [
     "*/*",
     "*"

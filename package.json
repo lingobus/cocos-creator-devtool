@@ -87,7 +87,6 @@
     "lodash": "4.17.4"
   },
   "dependencies": {
-    "element-ui": "2.4.5",
-    "vue": "2.5.17"
+    "element-ui": "2.4.5"
   }
 }

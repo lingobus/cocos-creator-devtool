@@ -12,6 +12,7 @@ const envconfigs = {
     views: path.resolve(__dirname, '../views')
   },
   externals: {
+    vue: 'Vue'
   },
   alias: {
     '@': path.resolve(__dirname, '../src'),
