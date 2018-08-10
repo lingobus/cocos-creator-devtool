@@ -1,4 +1,4 @@
-# cocos-creator-devtool
+# Cocos Creator Devtool
 Cocos Creator Devtool is an extension for Google Chrome Devtools. 
 It allows you to inspect the Cocos Creator game scenes in a web page.
 
