@@ -210,6 +210,13 @@ export default function () {
         if (comp) {
           return node[key] = new cc.Color(comp.r, comp.g, comp.b);
         }
+      } else if (key === 'eulerAngles') {
+        try {
+          let xyz = value.replace(/[()]/,'').split(', ').map(parseFloat);
+          return node[key] = cc.v3.apply(cc.v3, xyz);
+        } catch (e) {
+          console.error(`Can not convert ${value} to cc.v3`);
+        }
       }
       node[key] = value;
     },
@@ -239,6 +246,7 @@ export default function () {
       const kv = props.reduce((result, key) => {
         var value = n[key];
         if (key === 'color') value = value.toCSS();
+        if (key === 'eulerAngles') value = value.toString()
         result.push({key, value});
         return result;
       }, []);
