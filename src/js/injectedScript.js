@@ -1,20 +1,37 @@
 export default function () {
   if (!window.cc) return;
-  const SerializeProps = [
-    //identity
-    'name',
-    'active',
-    'uuid',
-    //position, dimesion
-    'x', 'y', 'width', 'height', 'zIndex',
-    //prepresentation
-    'color', 'opacity',
-    //transformation
-    'anchorX', 'anchorY',
-    'rotation', 'rotationX', 'rotationY',
-    'scale', 'scaleX', 'scaleY',
-    // 'skewX', 'skewY'
-  ];
+  const SerializeProps = {
+    default: [
+      //identity
+      'name',
+      'active',
+      'uuid',
+      //position, dimesion
+      'x', 'y', 'width', 'height', 'zIndex',
+      //prepresentation
+      'color', 'opacity',
+      //transformation
+      'anchorX', 'anchorY',
+      'rotation', 'rotationX', 'rotationY',
+      'scale', 'scaleX', 'scaleY',
+      // 'skewX', 'skewY'
+    ],
+    '2.0.0': [
+      //identity
+      'name',
+      'active',
+      'uuid',
+      //position, dimesion
+      'x', 'y', 'width', 'height', 'zIndex',
+      //prepresentation
+      'color', 'opacity',
+      //transformation
+      'anchorX', 'anchorY',
+      'angle', 'eulerAngles',
+      'scale', 'scaleX', 'scaleY',
+      // 'skewX', 'skewY'
+    ]
+  };
 
   const DebugLayerCss = `
     .debug-layer.show-all .debug-box,
@@ -33,6 +50,7 @@ export default function () {
   const DebugLayerStyleId = 'cc-devtool-style';
 
   const ccdevtool = window.ccdevtool = {
+    nodeId: 1,
     NodesCacheData,
     /**
      * Load tree node data
@@ -62,6 +80,9 @@ export default function () {
     postMessage (type, data) {
       window.postMessage({type, data}, '*');
     },
+    hasElement (selector) {
+      return !!document.querySelector(selector);
+    },
     /**
      * Show/hide given element
      * @param  {String} selector
@@ -71,6 +92,15 @@ export default function () {
       var ele = document.querySelector(selector);
       if (!ele) return false;
       ele.style.display = val ? '' : 'none';
+    },
+    /**
+     * Show/hide given node
+     * @param  {String} selector
+     * @param  {Boolean} val, true fro show, false for hide
+     */
+    toggleNode (path, value) {
+      const node = cc.find(path);
+      if (node) node.active = !!value;
     },
     /**
      * Hide debugging div
@@ -189,14 +219,14 @@ export default function () {
      * @param  {Number} index, index of component
      */
     inspectComponent (uuid, index) {
-      console.log(NodesCache[uuid]._components[index]);
+      console.trace(window.$c = NodesCache[uuid]._components[index]);
     },
     /**
      * Print node in Console
      * @param  {String} uuid, uuid of a node
      */
     inspectNode (uuid) {
-      console.log(NodesCache[uuid]);
+      console.trace(window.$n = NodesCache[uuid]);
     },
     /**
      * Serialize node info/props into plain objects
@@ -205,7 +235,8 @@ export default function () {
      * @return {Object}
      */
     serialize: function (n, zIndex = 0) {
-      const kv = SerializeProps.reduce((result, key) => {
+      const props = SerializeProps[cc.ENGINE_VERSION >= '2.0.0' ? '2.0.0' : 'default'];
+      const kv = props.reduce((result, key) => {
         var value = n[key];
         if (key === 'color') value = value.toCSS();
         result.push({key, value});
@@ -229,6 +260,7 @@ export default function () {
 
       const ret = NodesCacheData[n.uuid] = {
         // node: n, // this will cause `Object reference chain is too long` error
+        id: this.nodeId++,
         uuid: n.uuid,
         label: n.name,
         props: kv,

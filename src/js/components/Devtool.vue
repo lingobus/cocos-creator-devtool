@@ -8,7 +8,7 @@
       | &nbsp;
       el-checkbox(v-model="isShowFps") FPS Panel
       | &nbsp;
-      el-checkbox(v-model="isShowErudaBtn") Eruda Button
+      el-checkbox(v-show="hasEruda" v-model="isShowErudaBtn") Eruda Button
       | &nbsp;
       | &nbsp;
       el-button#refresh-btn(type="primary", size="mini", @click="refreshTree", icon="el-icon-refresh") Refresh
@@ -22,9 +22,9 @@
         el-tree(
           ref="tree",
           :data="treeNode",
-          node-key="uuid",
+          node-key="id",
           :highlight-current="true",
-          :default-expanded-keys="[1]",
+          :default-expanded-keys="[1, 2]",
           :expand-on-click-node="false",
           :filter-node-method="filterNode",
           @node-click="onClickTreeNode")
@@ -200,6 +200,10 @@ const app = {
     },
     isShowFps (val) {
       this.ccdevtool.toggleElement('#fps', val);
+      this.ccdevtool.toggleNode('PROFILER-NODE', val);
+    },
+    hasEruda () {
+      return this.ccdevtool.hasElement('.eruda-entry-btn');
     },
     isShowErudaBtn (val) {
       this.ccdevtool.toggleElement('.eruda-entry-btn', val);

@@ -1,5 +1,5 @@
 # Cocos Creator Devtool
-Cocos Creator Devtool is an extension for Google Chrome Devtools. 
+Cocos Creator Devtool is an extension for Google Chrome Devtools.
 It allows you to inspect the Cocos Creator game scenes in a web page.
 
 You can install [Cocos Creator Devtool](https://chrome.google.com/webstore/detail/cocos-creator-devtool/cnmkiolbnmjlhdkabcgobbgdomhhdnho)
@@ -10,6 +10,11 @@ from Chrome Webstore.
 
 # Changelog
 
+## 1.0.3
+- Toggle FPS node
+- set global variable `$c/$n` when inspecting component and node
+- Automatically expend node tree
+
 ## 1.0.2
 - Buttons for inspecting components on node
 - Change node properties with "+/-" button
@@ -19,3 +24,4 @@ from Chrome Webstore.
 ## 1.0.1
 - Node tree
 - Inspect node basic properties
+
