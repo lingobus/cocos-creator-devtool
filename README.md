@@ -10,6 +10,10 @@ from Chrome Webstore.
 
 # Changelog
 
+## 1.0.4
+- fix eulerAngles display/update bug
+- add `Compile` Button to trigger '/update-db' with window.fetch
+
 ## 1.0.3
 - Toggle FPS node
 - set global variable `$c/$n` when inspecting component and node

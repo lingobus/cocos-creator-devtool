@@ -12,6 +12,8 @@
       | &nbsp;
       | &nbsp;
       el-button#refresh-btn(type="primary", size="mini", @click="refreshTree", icon="el-icon-refresh") Refresh
+      | &nbsp;
+      el-button#compile-btn(type="primary", size="mini", @click="compile", icon="el-icon-setting") Compile
     el-container
       el-aside
         el-input(
@@ -260,6 +262,9 @@ const app = {
         }
         if (!this.isShowDebugLayer) this.ccdevtool.hideDebugLayer();
       });
+    },
+    compile() {
+      this.ccdevtool.compile();
     },
     filterNode (value, data) {
       if (!value) return true;

@@ -72,6 +72,9 @@ export default function () {
       }
       return ret;
     },
+    compile() {
+      fetch('/update-db');
+    },
     /**
      * Post message to content script and then forward message to cc-devtool
      * @param  {String} type, all type are prefixed with ':'
