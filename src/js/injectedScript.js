@@ -74,6 +74,7 @@ export default function () {
     },
     compile() {
       fetch('/update-db');
+      setTimeout(location.reload, 2000);
     },
     /**
      * Post message to content script and then forward message to cc-devtool
@@ -237,6 +238,12 @@ export default function () {
      */
     inspectNode (uuid) {
       console.trace(window.$n = NodesCache[uuid]);
+    },
+    reloadScene () {
+      try {
+        const s = cc.director.getScene();
+        cc.director.loadScene(s.name);
+      } catch(e) {}
     },
     /**
      * Serialize node info/props into plain objects

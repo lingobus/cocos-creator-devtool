@@ -11,7 +11,9 @@
       el-checkbox(v-show="hasEruda" v-model="isShowErudaBtn") Eruda Button
       | &nbsp;
       | &nbsp;
-      el-button#refresh-btn(type="primary", size="mini", @click="refreshTree", icon="el-icon-refresh") Refresh
+      el-button#refresh-btn(type="primary", size="mini", @click="refreshTree", icon="el-icon-refresh") Refresh Tree
+      | &nbsp;
+      el-button(type="primary", @click="reloadScene()", icon="el-icon-refresh", size="mini") Reload Scene
       | &nbsp;
       el-button#compile-btn(type="primary", size="mini", @click="compile", icon="el-icon-setting") Compile
     el-container
@@ -33,7 +35,7 @@
       el-main
         div(style="margin-bottom:1em;")
           i.el-icon-setting(style="font-size:24px;margin-right: 1em;vertical-align:middle;color:gray;")
-          el-button(type="primary", @click="inspectNode()", icon="el-icon-view") Inspect
+          el-button(type="primary", @click="inspectNode()", icon="el-icon-view", size="mini") Inspect
         el-table(:data="nodeComps", stripe, empty-text="No Data")
           el-table-column(prop="key", label="Component", :width="200")
           el-table-column(prop="value", label="", :width="300")
@@ -304,6 +306,9 @@ const app = {
     },
     inspectNode () {
       if (this.selectedNode) this.ccdevtool.inspectNode(this.selectedNode.uuid)
+    },
+    reloadScene () {
+      this.ccdevtool.reloadScene()
     },
     inspectComponent (row) {
       this.ccdevtool.inspectComponent(row.uuid, row.index);
