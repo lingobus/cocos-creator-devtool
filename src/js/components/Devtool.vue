@@ -3,7 +3,9 @@
   .root-container.clear-fix
     el-header
       img.logo(:src="LogImg")
-      h1 Cocos Creator Devtool
+      h1
+        a(style="color:black;text-decoration:none;"
+          target="_blank" href="https://chrome.google.com/webstore/detail/cocos-creator-devtool/cnmkiolbnmjlhdkabcgobbgdomhhdnho") Cocos Creator Devtool
       //- el-checkbox(v-model="isShowDebugLayer") Debug Layer
       | &nbsp;
       el-checkbox(v-model="isShowFps") FPS Panel
@@ -16,6 +18,8 @@
       el-button(type="primary", @click="reloadScene()", icon="el-icon-refresh", size="mini") Reload Scene
       | &nbsp;
       el-button#compile-btn(type="primary", size="mini", @click="compile", icon="el-icon-setting") Compile
+      | &nbsp;
+      el-button#compile-btn(type="primary", size="mini", @click="reload", icon="el-icon-refresh") Reload Extension
     el-container
       el-aside
         el-input(
@@ -186,8 +190,11 @@ const app = {
       log(message);
       switch (message.type) {
         case ':inspectedWinReloaded':
+          location.reload();
+          break;
+        case 'game_on_show':
         case ':loadScene':
-        this.init();
+          this.init();
           break;
       }
     });
@@ -230,6 +237,9 @@ const app = {
           reject(e);
         }
       });
+    },
+    reload() {
+      location.reload();
     },
     shouldDisplayText (row) {
       return ['uuid', 'name'].indexOf(row.key) >= 0;
@@ -319,16 +329,30 @@ const app = {
       const js = `(${fn})();`
       this.eval(js).then(_ => log('ccdevtool injected!'));
 
-      return this.eval('ccdevtool').then(ccdevtool => {
-        this.ccdevtool = {};
-        const self = this;
-        for (let name in ccdevtool) {
-          this.ccdevtool[name] = function (...args) {
-            args = JSON.stringify(args).slice(1,-1);
-            return self.eval(`ccdevtool.${name}(${args})`);
+      var tryTimes = 60;
+      const vm = this;
+      const doEval = function () {
+        vm.eval('ccdevtool').then(ccdevtool => {
+          vm.ccdevtool = {};
+          for (let name in ccdevtool) {
+            vm.ccdevtool[name] = function (...args) {
+              args = JSON.stringify(args).slice(1,-1);
+              return vm.eval(`ccdevtool.${name}(${args})`);
+            }
           }
-        }
-      })
+        });
+      };
+
+      return new Promise((rs,rj) => {
+        var timer = setInterval(() => {
+          doEval();
+          tryTimes -= 1;
+          if (tryTimes <= 0 || (vm.ccdevtool && Object.keys(vm.ccdevtool).length > 0)) {
+            clearInterval(timer);
+            rs();
+          }
+        }, 1000);
+      });
     }
   }
 }

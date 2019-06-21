@@ -63,6 +63,7 @@ export default function () {
       try {
         // suppress deprecation error
         cc.error = noop;
+        this.nodeId = 1;
         ret = this.serialize(scene);
       } catch (e) {
         log(e)
@@ -300,8 +301,32 @@ export default function () {
     cc.director.loadScene = function () {
       ccdevtool.postMessage(':loadScene');
       return loadScene.apply(cc.director, arguments);
-    }
+    };
   }
+  if (cc && cc.game) {
+    cc.game.on("game_on_show", function () {
+      ccdevtool.postMessage('game_on_show');
+    });
+  }
+//    if (cc && cc.game && cc.game.run) {
+//      let run = cc.game.run;
+//      cc.game.run = function () {
+//        let ret =  run.apply(cc.game, arguments);
+//        let onProgress = cc.loader.onProgress;
+//        console.log('cc.game.run');
+//        debugger;
+//        cc.loader.onProgress = function (completedCount, totalCount, item) {
+//          debugger;
+//          console.log(`cc.loader.onProgress:${completedCount}/${totalCount}`);
+//          if (completedCount === totalCount) ccdevtool.postMessage(':loadComplete')
+//          return onProgress.apply(cc.loader, arguments);
+//        };
+//
+//        ccdevtool.postMessage(':gameStarted');
+//        return ret;
+//      };
+//    }
+
 
   /**
    * print a nice-looking notification if this file injected
