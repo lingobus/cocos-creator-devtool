@@ -10,13 +10,17 @@ from Chrome Webstore.
 
 # Changelog
 
+## 1.0.5
+- Try to load nodes tree 60 times after game showed
+- Add Reload Extension button to force reload
+
 ## 1.0.4
-- fix eulerAngles display/update bug
-- add `Compile` Button to trigger '/update-db' with window.fetch
+- Fix eulerAngles display/update bug
+- Add `Compile` Button to trigger '/update-db' with window.fetch
 
 ## 1.0.3
 - Toggle FPS node
-- set global variable `$c/$n` when inspecting component and node
+- Set global variable `$c/$n` when inspecting component and node
 - Automatically expend node tree
 
 ## 1.0.2
