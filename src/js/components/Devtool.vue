@@ -40,11 +40,22 @@
         div(style="margin-bottom:1em;")
           i.el-icon-setting(style="font-size:24px;margin-right: 1em;vertical-align:middle;color:gray;")
           el-button(type="primary", @click="inspectNode()", icon="el-icon-view", size="mini") Inspect
-        el-table(:data="nodeComps", stripe, empty-text="No Data")
-          el-table-column(prop="key", label="Component", :width="200")
-          el-table-column(prop="value", label="", :width="300")
-            template(slot-scope="scope")
-              el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
+        //- el-table(:data="nodeComps", stripe, empty-text="No Data")
+        //-   el-table-column(prop="key", label="Component", :width="200")
+        //-   el-table-column(prop="value", label="", :width="300")
+        //-     template(slot-scope="scope")
+        //-       el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
+        h2 Components
+        table.el-table.comp-table(v-for="comp in nodeComps" v-if="nodeComps")
+          tr.el-table__row
+            th(v-text="comp.key")
+            th.inspect-btn
+              el-button(size="mini", type="normal", @click="inspectComponent(comp)", icon="el-icon-view") Inspect
+          tr.el-table__row(v-for="prop in comp.props")
+            td(v-text="prop.name")
+            td(v-text="prop.value")
+        
+        h2 Properties
         el-table(:data="nodeProps", stripe)
           el-table-column(prop="key", label="Property", :width="200")
           el-table-column(prop="value", label="Value", :width="300")
@@ -70,6 +81,13 @@ h1
   font-size: 14px
   display: inline
   margin: 0 1em 0 0
+
+.comp-table
+  border-collapse: collapse
+  .inspect-btn
+    text-align: right
+  th, td
+    padding: .5em 1em !important
 
 .el-table
   margin-bottom: 1em

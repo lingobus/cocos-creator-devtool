@@ -33,6 +33,19 @@ export default function () {
     ]
   };
 
+  const ignoredComponentProp = [
+    "_name",
+    "_objFlags",
+    "node",
+    "name",
+    "uuid",
+    "__scriptAsset",
+    "_enabled",
+    "enabled",
+    "enabledInHierarchy",
+    "_isOnLoadCalled"
+  ];
+
   const DebugLayerCss = `
     .debug-layer.show-all .debug-box,
     .debug-box:hover,
@@ -348,11 +361,19 @@ export default function () {
   function getComponentsData (n) {
     const comps = n._components;
     return comps.reduce((result, comp, i) => {
+      const props = comp.constructor.__props__.filter(prop => {
+        return ignoredComponentProp.indexOf(prop) < 0 && prop[0] != '_';
+      }).map(name => {
+        let value = valueOf(comp[name]);
+        return {name, value};
+      });
+      // console.log(props);
       result.push({
         key: comp.constructor.name,
         index: i,
         uuid: n.uuid,
-        value: '<<inspect>>'
+        value: '<<inspect>>',
+        props
       })
       return result;
     }, [])
@@ -370,5 +391,13 @@ export default function () {
         g: parseInt(comps[2], 16),
         b: parseInt(comps[3], 16)
     } : null;
+  }
+
+  function valueOf(val) {
+    const t = typeof val;
+    if (t === 'undefined' || t === 'string' || t === 'number' || val === null) {
+      return String(val);
+    }
+    if (val && val.constructor) return `<${val.constructor.name}>`;
   }
 }
