@@ -1,5 +1,6 @@
 {
-  "presets": ["es2015", "stage-2"],
-  "plugins": ["transform-runtime"],
+  "presets": [["@babel/env", {
+    "exclude": ["transform-typeof-symbol"]
+  }]],
   "comments": false
 }
