@@ -46,14 +46,22 @@
         //-     template(slot-scope="scope")
         //-       el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
         h2 Components
-        table.el-table.comp-table(v-for="comp in nodeComps" v-if="nodeComps")
-          tr.el-table__row
-            th(v-text="comp.key")
-            th.inspect-btn
-              el-button(size="mini", type="normal", @click="inspectComponent(comp)", icon="el-icon-view") Inspect
-          tr.el-table__row(v-for="prop in comp.props")
-            td(v-text="prop.name")
-            td(v-text="prop.value")
+        table.el-table.comp-table.el-table__body-wrapper.is-scrolling-none(v-for="comp in nodeComps" v-if="nodeComps" style="width:500px")
+          colgroup
+            col(width="200")
+            col(width="300")
+          thead
+            tr.el-table__row
+              th(v-text="comp.key")
+              th.inspect-btn
+                el-button(size="mini", type="normal", @click="inspectComponent(comp)", icon="el-icon-view") Inspect
+          tbody
+            tr.el-table__row(v-for="prop in comp.props")
+              td(v-text="prop.name")
+              td
+                component(v-if="prop.type" :is="prop.type" :data-raw-type="prop.rawType" v-model="prop.value" size="mini")
+                span(v-else-if="!prop.value") -
+                span(v-else v-text="prop.value")
         
         h2 Properties
         el-table(:data="nodeProps", stripe)
@@ -146,6 +154,11 @@ import ElMain from 'element-ui/lib/main'
 import ElFooter from 'element-ui/lib/footer'
 import ElTable from 'element-ui/lib/table'
 import ElTableColumn from 'element-ui/lib/table-column'
+
+// locale
+import lang from 'element-ui/lib/locale/lang/en'
+import locale from 'element-ui/lib/locale'
+locale.use(lang)
 
 const app = {
   name: 'app',

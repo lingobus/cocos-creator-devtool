@@ -364,10 +364,16 @@ export default function () {
       const props = comp.constructor.__props__.filter(prop => {
         return ignoredComponentProp.indexOf(prop) < 0 && prop[0] != '_';
       }).map(name => {
-        let value = valueOf(comp[name]);
-        return {name, value};
+        const type = typeOf(comp[name]);
+        const ret = { name, type: type.component, rawType: type.raw};
+        cc.js.getset(ret, 'value', () => {
+          return valueOf(comp[name]);
+        }, (str) => {
+          comp[name] = fromString(type.rawType, str);
+        }, true, true);
+        return ret;
       });
-      // console.log(props);
+      console.log(props);
       result.push({
         key: comp.constructor.name,
         index: i,
@@ -393,11 +399,101 @@ export default function () {
     } : null;
   }
 
+  function rgba2color(str) {
+    const vec = str.replace(/ /g, '')
+      .replace(/^rgba?/,'')
+    const comps = str2array(vec);
+    return cc.color.apply(cc, comps);
+  }
+
   function valueOf(val) {
     const t = typeof val;
-    if (t === 'undefined' || t === 'string' || t === 'number' || val === null) {
-      return String(val);
+    if (t === 'undefined' || t === 'string' || t === 'number' || t === 'boolean') {
+      return val;
+    }
+    if (val === null) return 'null';
+    switch(val.constructor.name) {
+      case 'Color':
+      case 'Size':
+      case 'Vec2':
+      case 'Vec3':
+        return val.toString();
     }
     if (val && val.constructor) return `<${val.constructor.name}>`;
+    return '<unknown>';
+  }
+
+  function typeOf(val) {
+    let raw = typeof val;
+    let c = '';
+    switch (raw) {
+      case 'string':
+        c = 'ElInput';
+        break;
+      case 'number':
+        c = 'ElInputNumber'
+        break;
+      case 'boolean':
+        c = 'ElSwitch'
+        break;
+    }
+    if (!c && val && val.constructor) {
+      raw = val.constructor.name;
+      switch(raw) {
+        case 'Color':
+          c = 'ElColorPicker'
+          break;
+        case 'Vec2':
+        case 'Vec3':
+        case 'Size':
+          c = 'ElInput';
+          break;
+      }
+    }
+    return {raw, component: c};
+  }
+
+  function fromString(rawType, str) {
+    switch(rawType) {
+      case 'null':
+      case 'undefined':
+      case 'string':
+        return str;
+      case 'number':
+        return str.indexOf('.') >= 0 ? parseFloat(str) : parseInt(str, 10);
+      case 'boolean':
+        return str === 'true'
+      case 'Vec2':
+      case 'Vec3':
+        return str2vec(str);
+      case 'Size':
+        return str2size(str);
+      case 'Color':
+        return str2color(str);
+      default:
+        return str;
+    }
+  }
+
+  function str2array (str) {
+    return str.replace(/[()]/,'').split(',').map(n => parseInt(n.trim(), 10));
+  }
+
+  function str2size (str) {
+    const vec = str2array(str);
+    return cc.size.apply(cc, vec);
+  }
+
+  function str2vec (str) {
+    const vec = str2array(str);
+    return vec.length === 3 ? cc.v3.apply(cc, vec) : cc.v2.apply(cc, vec);
+  }
+
+  function str2color (str) {
+    let c = hexToRgb(str);
+    if (!c) {
+      return cc.color(c.r, c.g, c.b, 255);
+    }
+    return rgba2color(str);
   }
 }
