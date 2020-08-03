@@ -1,6 +1,6 @@
 {
   "name": "Cocos Creator Devtool",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Chrome and DevTools extension for debugging Cocos Creator games",
   "manifest_version": 2,
   "browser_action": {
