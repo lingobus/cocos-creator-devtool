@@ -45,24 +45,7 @@
         //-   el-table-column(prop="value", label="", :width="300")
         //-     template(slot-scope="scope")
         //-       el-button(size="mini", type="normal", @click="inspectComponent(scope.row)", icon="el-icon-view") Inspect
-        h2 Components
-        table.el-table.comp-table.el-table__body-wrapper.is-scrolling-none(v-for="comp in nodeComps" v-if="nodeComps" style="width:500px")
-          colgroup
-            col(width="200")
-            col(width="300")
-          thead
-            tr.el-table__row
-              th(v-text="comp.key")
-              th.inspect-btn
-                el-button(size="mini", type="normal", @click="inspectComponent(comp)", icon="el-icon-view") Inspect
-          tbody
-            tr.el-table__row(v-for="prop in comp.props")
-              td(v-text="prop.name")
-              td
-                component(v-if="prop.type" :is="prop.type" :data-raw-type="prop.rawType" v-model="prop.value" size="mini")
-                span(v-else-if="!prop.value") -
-                span(v-else v-text="prop.value")
-        
+
         h2 Properties
         el-table(:data="nodeProps", stripe)
           el-table-column(prop="key", label="Property", :width="200")
@@ -77,6 +60,27 @@
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
               el-input(v-else, size="mini",
                 v-model="scope.row.value", @change="onPropChange(scope.row)")
+
+        h2 Components
+        el-collapse(style="display:inline-block")
+          el-collapse-item(v-for="(comp, index) in nodeComps" v-if="nodeComps" :key="index" :title="comp.key" style="width:500px")
+            table.el-table.comp-table.el-table__body-wrapper.is-scrolling-none
+              colgroup
+                col(width="200")
+                col(width="300")
+              thead
+                tr.el-table__row
+                  th
+                  th.inspect-btn
+                    el-button(size="mini", type="normal", @click="inspectComponent(comp)", icon="el-icon-view") Inspect
+              tbody
+                tr.el-table__row(v-for="prop in comp.props")
+                  td(v-text="prop.name")
+                  td
+                    component(v-if="prop.type" :is="prop.type" :readonly="true" :disabled="true" :data-raw-type="prop.rawType" v-model="prop.value" size="mini")
+                    span(v-else-if="!prop.value") -
+                    span(v-else v-text="prop.value")
+
 </template>
 
 <style lang="styl">
@@ -154,6 +158,8 @@ import ElMain from 'element-ui/lib/main'
 import ElFooter from 'element-ui/lib/footer'
 import ElTable from 'element-ui/lib/table'
 import ElTableColumn from 'element-ui/lib/table-column'
+import ElCollapse from 'element-ui/lib/collapse'
+import ElCollapseItem from 'element-ui/lib/collapse-item'
 
 // locale
 import lang from 'element-ui/lib/locale/lang/en'
@@ -177,7 +183,9 @@ const app = {
     ElMain,
     ElFooter,
     ElTable,
-    ElTableColumn
+    ElTableColumn,
+    ElCollapse,
+    ElCollapseItem
   },
   data () {
     return {
@@ -216,8 +224,25 @@ const app = {
 
     log(`Connecting to window #${tabId}`);
 
+    const self = this;
+    function setSelectedNodeProp(newProps) {
+      for (let k in newProps) {
+        if (k === 'uuid') continue;
+        const kv = self.selectedNode.props.find(prop => prop.key === k);
+        if (kv) kv.value = newProps[k];
+      }
+    }
+    let lastMessage;
+    function checkMessage(message) {
+      if (!lastMessage || !message.data.uuid) return true;
+      if (message.type !== lastMessage.type) return true;
+      for (var key in message.data) {
+        if (message.data[key] !== lastMessage.data[key]) return true;
+      }
+      return false;
+    }
     conn.onMessage.addListener(message => {
-      if (!message) return;
+      if (!message || !checkMessage(message)) return;
       log(message);
       switch (message.type) {
         case ':inspectedWinReloaded':
@@ -227,7 +252,32 @@ const app = {
         case ':loadScene':
           this.init();
           break;
+        case 'position-changed':
+        case 'size-changed':
+        case 'scale-changed':
+        case 'rotation-changed':
+        case 'anchor-changed':
+        case 'active-in-hierarchy-changed':
+        case 'sibling-order-changed':
+        case 'opacity-changed':
+          if (self.selectedNode && message.data.uuid ===  self.selectedNode.uuid) {
+            setSelectedNodeProp(message.data);
+          }
+          break;
+        case 'color-changed':
+          if (self.selectedNode && message.data.uuid ===  self.selectedNode.uuid) {
+              const color = message.data.color;
+              const r = color._val & 0x000000ff;
+              const g = (color._val & 0x0000ff00) >> 8;
+              const b = (color._val & 0x00ff0000) >> 16;
+              const a = (color._val & 0xff000000) >>> 24;
+              setSelectedNodeProp({
+                color: `rgba(${r},${g},${b},${a})`
+              });
+            }
+          break;
       }
+      lastMessage = message;
     });
 
     this.init();

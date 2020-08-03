@@ -289,6 +289,33 @@ export default function () {
        * pass node reference to devtool will cause `Object reference chain is too long` error
        */
       NodesCache[n.uuid] = n;
+      n.off('position-changed', this.onPositionChanged, n);
+      n.on('position-changed', this.onPositionChanged, n);
+
+      n.off('size-changed', this.onSizeChanged, n);
+      n.on('size-changed', this.onSizeChanged, n);
+
+      n.off('scale-changed', this.onScaleChanged, n);
+      n.on('scale-changed', this.onScaleChanged, n);
+
+      n.off('rotation-changed', this.onRotationChanged, n);
+      n.on('rotation-changed', this.onRotationChanged, n);
+
+      n.off('color-changed', this.onColorChanged, n);
+      n.on('color-changed', this.onColorChanged, n);
+
+      n.off('anchor-changed', this.onAnchorChanged, n);
+      n.on('anchor-changed', this.onAnchorChanged, n);
+
+      n.off('active-in-hierarchy-changed', this.onActiveInHierarchyChanged, n);
+      n.on('active-in-hierarchy-changed', this.onActiveInHierarchyChanged, n);
+
+      n.off('sibling-order-changed', this.onSiblingOrderChanged, n);
+      n.on('sibling-order-changed', this.onSiblingOrderChanged, n);
+
+      proxyPropSetter(n, 'opacity', 'opacity-changed');
+      n.off('opacity-changed', this.onOpacityChanged, n);
+      n.on('opacity-changed', this.onOpacityChanged, n);
 
       const ret = NodesCacheData[n.uuid] = {
         // node: n, // this will cause `Object reference chain is too long` error
@@ -302,6 +329,51 @@ export default function () {
       }
       // if (n.parent !== cc.director.getScene()) this.createDebugBox(n, zIndex);
       return ret;
+    },
+    onPositionChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, x: this.x, y: this.y};
+      ccdevtool.postMessage('position-changed', data);
+    },
+    onSizeChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, width: this.width, height: this.height};
+      ccdevtool.postMessage('size-changed', data);
+    },
+    onScaleChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, scaleX: this.scaleX, scaleY: this.scaleY, scale: this.scale};
+      ccdevtool.postMessage('scale-changed', data);
+    },
+    onRotationChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, rotationX: this.rotationX, rotationY: this.rotationY, rotation: this.rotation};
+      ccdevtool.postMessage('rotation-changed', data);
+    },
+    onColorChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, color: this.color};
+      ccdevtool.postMessage('color-changed', data);
+    },
+    onAnchorChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, anchorX: this.anchorX, anchorY: this.anchorY, anchor: this.anchor};
+      ccdevtool.postMessage('anchor-changed', data);
+    },
+    onActiveInHierarchyChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, active: this.active};
+      ccdevtool.postMessage('active-in-hierarchy-changed', data);
+    },
+    onSiblingOrderChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, zIndex: this.zIndex};
+      ccdevtool.postMessage('sibling-order-changed', data);
+    },
+    onOpacityChanged() {
+      if (!(this instanceof cc.Node)) return;
+      const data = {uuid: this.uuid, opacity: this.opacity};
+      ccdevtool.postMessage('opacity-changed', data);
     }
   };
 
@@ -373,7 +445,7 @@ export default function () {
         }, true, true);
         return ret;
       });
-      console.log(props);
+      // console.log(props);
       result.push({
         key: comp.constructor.name,
         index: i,
@@ -495,5 +567,17 @@ export default function () {
       return cc.color(c.r, c.g, c.b, 255);
     }
     return rgba2color(str);
+  }
+
+  function proxyPropSetter(n, prop, event) {
+    try {
+      const setter = Object.getOwnPropertyDescriptor(n.constructor.prototype, prop).set;
+      cc.js.getset(n, prop, function () {
+        return this._opacity;
+      }, function(value) {
+        setter.call(this, value);
+        this.emit(event);
+      });
+    } catch (e) {}
   }
 }
