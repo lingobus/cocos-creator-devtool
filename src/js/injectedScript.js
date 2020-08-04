@@ -313,6 +313,12 @@ export default function () {
       n.off('sibling-order-changed', this.onSiblingOrderChanged, n);
       n.on('sibling-order-changed', this.onSiblingOrderChanged, n);
 
+      n.off('child-removed', this.onChildRemoved, n);
+      n.on('child-removed', this.onChildRemoved, n);
+
+      n.off('child-added', this.onChildAdded, n);
+      n.on('child-added', this.onChildAdded, n);
+
       proxyPropSetter(n, 'opacity', 'opacity-changed');
       n.off('opacity-changed', this.onOpacityChanged, n);
       n.on('opacity-changed', this.onOpacityChanged, n);
@@ -320,6 +326,7 @@ export default function () {
       const ret = NodesCacheData[n.uuid] = {
         // node: n, // this will cause `Object reference chain is too long` error
         id: this.nodeId++,
+        parentUuid: n.parent ? n.parent.uuid : null,
         uuid: n.uuid,
         label: n.name,
         props: kv,
@@ -374,6 +381,17 @@ export default function () {
       if (!(this instanceof cc.Node)) return;
       const data = {uuid: this.uuid, opacity: this.opacity};
       ccdevtool.postMessage('opacity-changed', data);
+    },
+    onChildRemoved(child) {
+      if (!(child instanceof cc.Node)) return;
+      const data = {uuid: child.uuid};
+      ccdevtool.postMessage('child-removed', data);
+    },
+    onChildAdded(child) {
+      if (!(child instanceof cc.Node)) return;
+      const data = ccdevtool.serialize(child);
+      const index = child.parent.children.findIndex(c => c === child);
+      ccdevtool.postMessage('child-added', {child: data, parentUuid: this.uuid, index: index});
     }
   };
 
@@ -572,12 +590,18 @@ export default function () {
   function proxyPropSetter(n, prop, event) {
     try {
       const setter = Object.getOwnPropertyDescriptor(n.constructor.prototype, prop).set;
-      cc.js.getset(n, prop, function () {
-        return this._opacity;
-      }, function(value) {
+      if (setter.__imprinted) {
+        console.log('imprinted, skip');
+        return;
+      };
+      const newSetter = function (value) {
         setter.call(this, value);
         this.emit(event);
-      });
+      }
+      newSetter.__imprinted = true;
+      cc.js.getset(n, prop, function () {
+        return this._opacity;
+      }, newSetter);
     } catch (e) {}
   }
 }

@@ -276,6 +276,22 @@ const app = {
               });
             }
           break;
+        case 'child-removed': {
+          const found = findNode(self.treeNode[0], null, message.data.uuid);
+          if (found) {
+            found[0].children.splice(found[1], 1);
+          }
+          break;
+        }
+        case 'child-added': {
+          const node = message.data.child;
+          const parentUuid = message.data.parentUuid;
+          const index = message.data.index;
+          const found = findNode(self.treeNode[0], null, parentUuid);
+          const parent = found[0].children[found[1]];
+          parent.children.splice(index, 0, node);
+          break;
+        }
       }
       lastMessage = message;
     });
@@ -438,6 +454,26 @@ const app = {
   }
 }
 
+/**
+ * find node with given uuid in the a tree
+ *
+ * @param   {NodeInfo}  node    root node
+ * @param   {NodeInfo | null}  parent  parent of root node
+ * @param   {string}  uuid    uuid to be found
+ * @param   {Number}  index   root node index
+ *
+ * @return  {[NodeInfo, number]}          [parent node, index of found node]
+ */
+function findNode(node, parent, uuid, index) {
+  if (!node) return null;
+  if (node.uuid === uuid) return [parent, index];
+  if (!node.children || !node.children.length) return null;
+  for (let i in node.children) {
+    const found = findNode(node.children[i], node, uuid, i);
+    if (found) return found;
+  }
+  return null;
+}
 
 export default app;
 </script>
