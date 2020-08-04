@@ -10,6 +10,12 @@ from Chrome Webstore.
 
 # Changelog
 
+## 1.0.6
+- Automatically update node properties
+- Automatically update node tree when node added/removed
+- Move components after propert section
+- Display component property detail (readonly)
+
 ## 1.0.5
 - Try to load nodes tree 60 times after game showed
 - Add Reload Extension button to force reload
