@@ -4,7 +4,7 @@
   "description": "Chrome and DevTools extension for debugging Cocos Creator games",
   "main": "index.js",
   "scripts": {
-    "setup": "npm i --registry=http://registry.npm.taobao.org",
+    "setup": "npm i --registry=https://registry.npmmirror.com",
     "release": "cross-env NODE_ENV=production node ./bin/build.js",
     "start": "cross-env NODE_ENV=development webpack --watch --config ./bin/webpack.dev.conf.js"
   },
